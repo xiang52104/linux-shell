@@ -1,0 +1,45 @@
+ yum -y install  java-1.8.0-openjdk     
+ yum -y install java-1.8.0-openjdk-headless 
+ tar -xf  apache-tomcat-8.0.30.tar.gz
+  mv apache-tomcat-8.0.30  /usr/local/tomcat
+mv /dev/random /dev/random.bak
+Ln –s /dev/urandom /dev/random
+  /usr/local/tomcat/bin/startup.sh
+  2.	部署虚拟网页
+[root@web1 ~]# vim /usr/local/tomcat/conf/server.xml
+<Host name="www.a.com" appBase="a" unpackWARS="true" autoDeploy="true">
+</Host>
+<Host name="www.b.com" appBase="b" unpackWARS="true" autoDeploy="true">
+</Host>
+3.	修改www.b.com网站的首页目录为base
+<Host name="www.a.com" appBase="a" unpackWARS="true" autoDeploy="true">
+<Context path="/test" docBase="/var/www/html/" />
+</Host>
+
+<Host name="www.b.com" appBase="b" unpackWARS="true" autoDeploy="true">
+<Context path="" docBase="base" />
+</Host>
+4.	部署安全加密网页
+[root@web1 ~]# keytool -genkeypair -alias tomcat -keyalg RSA -keystore /usr/local/tomcat/keystore  
+<Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
+maxThreads="150" SSLEnabled="true" scheme="https" secure="true"
+keystoreFile="/usr/local/tomcat/keystore" keystorePass="123456" clientAuth="false" sslProtocol="TLS" />
+步骤五：配置Tomcat日志
+1)为每个虚拟主机设置不同的日志文件
+1.	[root@web1 ~]# vim /usr/local/tomcat/conf/server.xml
+2.	.. ..
+3.	<Host name="www.a.com" appBase="a" unpackWARS="true" autoDeploy="true">
+4.	<Context path="/test" docBase="/var/www/html/" />
+5.	#从默认localhost虚拟主机中把Valve这段复制过来，适当修改下即可
+6.	<Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
+7.	               prefix=" a_access" suffix=".txt"
+8.	               pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+9.	</Host>
+10.	
+11.	<Host name="www.b.com" appBase="b" unpackWARS="true" autoDeploy="true">
+12.	<Context path="" docBase="base" />
+13.	<Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
+14.	               prefix=" b_access" suffix=".txt"
+15.	               pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+16.	</Host>
+
