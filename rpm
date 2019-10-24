@@ -1,3 +1,45 @@
-将源码转换为rpm
+将源码转换为rpm(安装结果的压缩包)
 光盘里的rpm包太老了，需要用源码安装，但是可以将源码转为rpm
 安装rpmbuild
+yum -y install rpm-build
+rpmbuild -ba nginx.spec
+[root@virtb1 ~]# ls rpmbuild/
+BUILD  BUILDROOT  RPMS  SOURCES  SPECS  SRPMS
+cp nginx-1.12.2.tar.gz /root/rpmbuild/SOURECES/ 
+vim /root/rpmbuild/SPECS/nginx.spec
+[root@web1 ~]# vim /root/rpmbuild/SPECS/nginx.spec
+Name:nginx #源码包软件名称
+Version:1.12.2 #源码包软件的版本号
+Release: 10 #制作的RPM包版本号
+Summary: Nginx is a web server software. #RPM软件的概述
+License:GPL #软件的协议
+URL: www.test.com #网址
+Source0:nginx-1.12.2.tar.gz #源码包文件的全称
+#BuildRequires: #制作RPM时的依赖关系
+#Requires: #安装RPM时的依赖关系
+%description
+nginx [engine x] is an HTTP and reverse proxy server. #软件的详细描述
+%post
+useradd nginx #非必需操作：安装后脚本(创建账户)
+%prep
+%setup -q #自动解压源码包，并cd进入目录
+%build
+./configure
+make %{?_smp_mflags}
+%install
+make install DESTDIR=%{buildroot}
+%files
+%doc
+/usr/local/nginx/* #对哪些文件与目录打包
+%changelog
+#安装GCC openssl-devel pcre-devel
+yum -y install gcc openssl-devel pcre-devel
+ls RPMS/x86_64/
+nginx-1.12.2-10.x86_64.rpm  nginx-debuginfo-1.12.2-10.x86_64.rpm
+#安装测试
+rpm -ivh RPMS/x86_64/nginx-1.12.2-10.x86_64.rpm
+rpm -qa | grep nginx
+#启动nginx
+/usr/local/nginx/sbin/nginx
+#测试网页
+curl http://127.0.0.1/
