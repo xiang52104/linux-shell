@@ -1,0 +1,24 @@
+#gre configure
+
+#start ip_gre
+[root@client ~]#modprobe ip_gre
+[root@client ~]#modinfo ip_gre
+[root@client ~]#ip tunnel add tun0 mode gre remote 201.1.2.5 local 201.1.2.10
+[root@client ~]#ip link set tun0 up
+[root@client ~]#ip addr add 10.10.10.10/24 peer 10.10.10.5/24 dev tun0
+[root@client ~]#ip a s tun0
+8: tun0@NONE: <POINTOPOINT,NOARP,UP,LOWER_UP> mtu 1476 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/gre 201.1.2.10 peer 201.1.2.5
+    inet 10.10.10.10 peer 10.10.10.5/24 scope global tun0
+       valid_lft forever preferred_lft forever
+[root@proxy ~]#modprobe ip_gre
+[root@proxy ~]#ip tunnel add tun0 mode gre remote 201.1.2.10 local 201.1.2.5
+[root@proxy ~]#ip a s tun0
+[root@proxy ~]#ip link set tun0 up
+[root@proxy ~]#ip a s tun0
+[root@proxy ~]#ip addr add 10.10.10.5/24 peer 10.10.10.10/24
+[root@proxy ~]#ip addr add 10.10.10.5/24 peer 10.10.10.10/24 dev tun0
+[root@proxy ~]#ip a s tun0
+
+#pptp configure
+yum -y intall pptpd.x86_64 0:1.4.0-2.el7
