@@ -21,4 +21,18 @@
 [root@proxy ~]#ip a s tun0
 
 #pptp configure
-yum -y intall pptpd.x86_64 0:1.4.0-2.el7
+[root@proxy ~]#iyum -y intall pptpd.x86_64 0:1.4.0-2.el7
+[root@proxy ~]#irpm -qc pptpd
+/etc/ppp/options.pptpd
+/etc/pptpd.conf
+/etc/sysconfig/pptpd
+[root@proxy ~]#vim /etc/pptpd.conf
+localip 201.1.2.5
+remoteip 192.168.3.1-59
+[root@proxy ~]#vim /etc/ppp/chap-secrets
+jacob * 123456 *
+[root@proxy ~]#vim /etc/pptp/options.pptpd
+require-mppe-128                                    //使用MPPE加密数据
+ms-dns 8.8.8.8                                    //DNS服务器
+[root@proxy ~]#systemctl restart pptpd
+[root@proxy ~]#systemctl enable pptpd
