@@ -1,0 +1,35 @@
+#lvs
+#配置网络环境
+集群对外公网IP地址为192.168.4.5
+调度器内网IP地址为192.168.2.5
+真实Web服务器地址分别为192.168.2.100、192.168.2.200
+使用加权轮询调度算法，真实服务器权重分别为1和2
+client eth0 192.168.4.10
+proxy eth0 192.168.4.5/24
+      eth1 192.168.2.5
+web1  eth1 192.168.2.100
+      gw 192.168.2.5
+web2 eth1 192.168.2.200
+      gw 192.168.2.5
+route -n
+yum -y install httpd
+systemctl start httpd
+[root@proxy ~]# echo 1 > /proc/sys/net/ipv4/ip_forward
+[root@proxy ~]# cat /proc/sys/net/ipv4/ip_forward
+1
+[root@proxy ~]# echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
+#配置LVS-NAT模式调度器
+yum - y install ipvsadm
+ipvsadm -A -t 192.168.4.5:80 -s wrr
+ipvsadm -a -t 192.168.4.5:80 -r 192.168.2.100 -m -w 1
+ipvsadm -a -t 192.168.4.5:80 -r 192.168.2.200 -m -w 1
+ipvsadm -Ln
+ipvsadm-save-n > /etc/sysconfig/ipvsadm
+
+#LVS-DR
+#LVs-DR 环境部署
+客户端IP地址为192.168.4.10
+LVS调度器VIP地址为192.168.4.15
+LVS调度器DIP地址设置为192.168.4.5
+真实Web服务器地址分别为192.168.4.100、192.168.4.200
+使用加权轮询调度算法，web1的权重为1，web2的权重为2
